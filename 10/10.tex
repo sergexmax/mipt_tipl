@@ -1,0 +1,549 @@
+%
+\newcommand{\ptitle}{ТРЯП, 10-ое Домашнее Задание}
+\newcommand{\pauthor}{Сергей Пучинин}
+\newcommand{\pgroup}{873}
+\newcommand{\pdate}{\today}
+%
+\documentclass[10pt]{article}
+%
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+%
+\usepackage{geometry}
+  \geometry{a4paper, left=1.5cm, right=1cm, top=2cm, bottom=2cm}
+%
+\usepackage{multicol}
+  \setlength{\columnsep}{1pt}
+%
+\usepackage{lipsum} % debugging
+%
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    linkcolor = red,
+    linktoc=all
+  }
+\newcommand{\figref}[1]{\figurename~\ref{#1}}
+%
+% \usepackage[all]{hypcap}
+%
+\usepackage{caption}
+%
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+  \pagestyle{fancy}
+  \fancyhf{}
+  \lhead{\ptitle}
+  \rhead{\pauthor, \pgroup}
+  \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  \fancypagestyle{fancytitlepage}{
+    \lhead{}
+    \rhead{}
+    \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  }
+%
+\usepackage{tikz}
+  \usetikzlibrary{arrows,automata,positioning,trees}
+%
+\usepackage{xargs} % multiple default parameters
+%
+\newcounter{pr} \setcounter{pr}{0}
+\newenvironmentx{pr}[2][1=,2= ]
+  {\par\bigskip
+   \refstepcounter{pr}
+   \addcontentsline{toc}{section}{Задача \arabic{pr}#1}
+   {\large\bfseries Задача \arabic{pr}#1.#2}}
+  {}
+\newcounter{subpr}[pr] \setcounter{subpr}{0}
+\newenvironmentx{subpr}[2][1=,2= ]
+  {\par\medskip\hspace{\parindent}
+   \refstepcounter{subpr}
+   \addcontentsline{toc}{subsection}{\Asbuk{subpr}#1}
+   {\normalsize\bfseries \Asbuk{subpr}#1.#2}}
+  {}
+\newenvironment{pruf}
+  {\par
+  {\itshape \underline{Доказательство.}}}
+  {\par\hfill$\blacksquare$}
+\newenvironment{sol}
+  {\par
+   {\itshape \underline{Решение.}}}
+  {}
+\newcounter{lem} \setcounter{lem}{0}
+\newenvironment{lem}
+  {\par\bigskip
+   \refstepcounter{lem}
+   {\itshape Лемма \arabic{lem}.}}
+  {}
+% \newenvironment{lempruf}
+%   {\par
+%   {\itshape Доказательство.}}
+%   {\par\hfill$\Box$}
+%
+\usepackage{chngcntr}
+  \counterwithin{figure}{pr}
+  \counterwithin{table}{pr}
+%
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+%
+\newcommand{\eps}{\varepsilon}
+\newcommand{\yield}{\Rightarrow}
+\newcommand{\yields}{\xRightarrow{*}}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\emptyset}{\varnothing}
+% tipl specific
+\newcommand{\REG}{\mathsf{REG}}
+\newcommand{\CFL}{\mathsf{CFL}}
+\newcommand{\PAL}{\mathsf{PAL}}
+\newcommand{\Pref}{\mathrm{Pref}}
+\newcommand{\Suf}{\mathrm{Suf}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\first}{\mathrm{FIRST}}
+\newcommand{\follow}{\mathrm{FOLLOW}}
+\newcommand{\LL}{\mathrm{LL}}
+%
+% \sloppy
+%
+\begin{document}
+  %
+  \title{\ptitle}
+  \author{\pauthor, \pgroup}
+  \date{\pdate}
+  \maketitle
+  \thispagestyle{fancytitlepage}
+  %
+  \begin{pr}
+    Грамматика
+    \[
+      \mathsf{Expr} = \Big\langle
+        \big\{ E,\, T,\, F,\, E',\, F' \big\},\,
+        \big\{ \id,\, +,\, \times,\, (,\, ) \big\},\, P,\, E
+      \Big\rangle
+    \] имеет множество правил $P:$
+    \begin{gather*}
+      E \to TE';\; E' \to + TE' \mid \eps; \\
+      T \to FT';\; T' \to \times FT' \mid \eps; \\
+      F \to (E) \mid \id.
+    \end{gather*}
+    Вычислите функции $\first$ и $\follow$ для всех нетерминалов грамматики
+    $\mathsf{Expr}$.
+    %
+    \begin{sol}
+      Вычисленные функции приведены в Таблицах \ref{table:first} и
+      \ref{table:follow}.
+      \begin{table}[ht!]
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c|c|c|c}
+                  & $E$         & $E'$        & $T$         & $T'$             & $F$         \\
+            \hline
+            $F_0$ & $\emptyset$ & $\eps$      & $\emptyset$ & $\eps$           & $\emptyset$ \\
+            \hline
+            $F_1$ & $\emptyset$ & $\eps,\, +$ & $\emptyset$ & $\eps,\, \times$ & $(,\, \id$  \\
+            \hline
+            $F_2$ & $\emptyset$ & $\eps,\, +$ & $(,\, \id$  & $\eps,\, \times$ & $(,\, \id$  \\
+            \hline
+            $F_3$ & $(,\, \id$  & $\eps,\, +$ & $(,\, \id$  & $\eps,\, \times$ & $(,\, \id$  \\
+            \hline
+            $F_4$ & $(,\, \id$  & $\eps,\, +$ & $(,\, \id$  & $\eps,\, \times$ & $(,\, \id$  \\
+          \end{tabular}
+          \caption{$\first$}
+          \label{table:first}
+        }
+        \hfill
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c|c|c|c}
+                  & $E$        & $E'$        & $T$            & $T'$           & $F$                      \\
+            \hline
+            $F_0$ & $\$$       & $\emptyset$ & $\emptyset$    & $\emptyset$    & $\emptyset$              \\
+            \hline
+            $F_1$ & $\$,\, )$  & $\$$        & $+,\, \$$      & $\emptyset$    & $\times$                 \\
+            \hline
+            $F_2$ & $\$,\, )$  & $\$,\, )$   & $+,\, \$,\, )$ & $+,\, \$$      & $\times,\, +,\, \$$      \\
+            \hline
+            $F_3$ & $\$,\, )$  & $\$,\, )$   & $+,\, \$,\, )$ & $+,\, \$,\, )$ & $\times,\, +,\, \$,\, )$ \\
+            \hline
+            $F_4$ & $\$,\, )$  & $\$,\, )$   & $+,\, \$,\, )$ & $+,\, \$,\, )$ & $\times,\, +,\, \$,\, )$ \\
+          \end{tabular}
+          \caption{$\follow$}
+          \label{table:follow}
+        }
+      \end{table}
+    \end{sol}
+  \end{pr}
+  %
+  \begin{pr}
+    Построить дерево вывода, левые и правые разборы для слова $((\id))$ в
+    грамматике $\mathsf{Expr}$.
+    %
+    \begin{sol}
+      Дерево разбора приведено на \figref{fig:tree}. Левый и правый разборы~"---
+      \figref{fig:left}, \figref{fig:right}.
+      \begin{multicols}{3}
+        \begin{minipage}{.9\linewidth}
+          \captionsetup{type=figure}
+          \centering
+          \begin{tikzpicture}[scale=.604]
+            \tikzstyle{level 1}=[sibling distance=16mm]
+            \tikzstyle{level 3}=[sibling distance=9mm]
+            \tikzstyle{level 4}=[sibling distance=16mm]
+            \tikzstyle{level 6}=[sibling distance=9mm]
+            \tikzstyle{level 7}=[sibling distance=16mm]
+            \node {$E$}
+              child{ node {$T$}
+                child{ node {$F$}
+                  child { node {$($} }
+                  child { node {$E$}
+                    child{ node {$T$}
+                      child{ node {$F$}
+                        child { node {$($} }
+                        child { node {$E$}
+                          child{ node {$T$}
+                            child{ node {$F$}
+                              child { node {$id$} }
+                            }
+                            child{ node {$T'$}
+                              child{ node {$\eps$} }
+                            }
+                          }
+                          child{ node {$E'$}
+                            child{ node {$\eps$} }
+                          }
+                        }
+                        child { node {$)$} }
+                      }
+                      child{ node {$T'$}
+                        child{ node {$\eps$} }
+                      }
+                    }
+                    child{ node {$E'$}
+                      child{ node {$\eps$} }
+                    }
+                  }
+                  child { node {$)$} }
+                }
+                child{ node {$T'$}
+                  child{ node {$\eps$} }
+                }
+              }
+              child{ node {$E'$}
+                child{ node {$\eps$} }
+              };
+          \end{tikzpicture}
+          \caption{Дерево разбора $((id))$}
+          \label{fig:tree}
+        \end{minipage}
+
+        \columnbreak
+
+        \begin{minipage}{.9\linewidth}
+          \captionsetup{type=figure}
+          \centering
+          \begin{align*}
+            E & \to TE' \\
+            T & \to FT' \\
+            F & \to (E) \\
+            E & \to TE' \\
+            T & \to FT' \\
+            F & \to (E) \\
+            E & \to TE' \\
+            T & \to FT' \\
+            F & \to \id \\
+            T' & \to \eps \\
+            E' &  \to \eps \\
+            T' & \to \eps \\
+            E' & \to \eps \\
+            T' & \to \eps \\
+            E' & \to \eps
+          \end{align*}
+          \caption{Левый разбор $((id))$}
+          \label{fig:left}
+        \end{minipage}
+
+        \columnbreak
+
+        \begin{minipage}{.9\linewidth}
+          \captionsetup{type=figure}
+          \centering
+          \begin{align*}
+            E & \to TE' \\
+            E' & \to \eps \\
+            T & \to FT' \\
+            T' & \to \eps \\
+            F & \to (E) \\
+            E & \to TE' \\
+            E' & \to \eps \\
+            T & \to FT' \\
+            T' & \to \eps \\
+            F & \to (E) \\
+            E & \to TE' \\
+            E' & \to \eps \\
+            T & \to FT' \\
+            T' & \to \eps \\
+            F & \to \id
+          \end{align*}
+          \caption{Правый разбор $((id))$}
+          \label{fig:right}
+        \end{minipage}
+      \end{multicols}
+    \end{sol}
+  \end{pr}
+  %
+  \begin{pr}
+    Постройте $\LL(1)$-анализатор для грамматики $\mathsf{Expr}$.
+    Продемонстрируйте его работу на слове $id + id \times id$ и, в случае
+    успеха, постройте дерево разбора по результатам работы анализатора.
+    %
+    \begin{sol}
+      Занумеруем правила вывода и построим $LL(1)$-анализатор
+      (Таблица \ref{table:ll1}).
+      \begin{multicols}{2}
+        \begin{minipage}{.9\linewidth}
+          \centering
+          \vspace{0.5cm}
+          \begin{gather*}
+            E \xrightarrow[1]{} TE';\; E' \xrightarrow[2]{} + TE';\;
+              E' \xrightarrow[7]{} \eps; \\
+            T \xrightarrow[3]{} FT';\; T' \xrightarrow[4]{} \times FT';\;
+              T' \xrightarrow[8]{} \eps; \\
+            F \xrightarrow[5]{} (E);\; F \xrightarrow[6]{} \id.
+          \end{gather*}
+        \end{minipage}
+
+        \columnbreak
+
+        \begin{minipage}{.9\linewidth}
+          \captionsetup{type=table}
+          \centering
+          \begin{tabular}{c|c|c|c|c|c}
+                     & $E$ & $E'$ & $T$ & $T'$ & $F$ \\
+            \hline
+            $\id$    & $1$ & $-$  & $3$ & $-$  & $6$ \\
+            \hline
+            $+$      & $-$ & $2$  & $-$ & $8$  & $-$ \\
+            \hline
+            $\times$ & $-$ & $-$  & $-$ & $4$  & $-$ \\
+            \hline
+            $($      & $1$ & $-$  & $3$ & $-$  & $5$ \\
+            \hline
+            $)$      & $-$ & $7$  & $-$ & $8$  & $-$ \\
+            \hline
+            $\$$     & $-$ & $7$  & $-$ & $8$  & $-$ \\
+          \end{tabular}
+          \caption{$LL(1)$-анализатор}
+          \label{table:ll1}
+        \end{minipage}
+      \end{multicols}
+      Далее продемонстрируем работу полученного $LL(1)$-анализатора на слове
+      $\id + \id \times \id$ (\figref{fig:id}). Слово было обработано до конца
+      $LL(1)$-анализатором, поэтому строим для него дерево разбора
+      (\figref{fig:treeid}).
+      \begin{multicols}{2}
+        \begin{minipage}{.9\linewidth}
+          \captionsetup{type=figure}
+          \centering
+          \begin{align*}
+            \big( \id + \id \times \id \$ & \mid E \$ \big) \\
+            \big( \id + \id \times \id \$ & \mid TE' \$ \big) \\
+            \big( \id + \id \times \id \$ & \mid FT'E' \$ \big) \\
+            \big( \id + \id \times \id \$ & \mid \id T'E' \$ \big) \\
+            \big( + \id \times \id \$ & \mid T'E' \$ \big) \\
+            \big( + \id \times \id \$ & \mid E' \$ \big) \\
+            \big( + \id \times \id \$ & \mid +TE' \$ \big) \\
+            \big( \id \times \id \$ & \mid TE' \$ \big) \\
+            \big( \id \times \id \$ & \mid FT'E' \$ \big) \\
+            \big( \id \times \id \$ & \mid \id T'E' \$ \big) \\
+            \big( \times \id \$ & \mid T'E' \$ \big) \\
+            \big( \times \id \$ & \mid \times FT'E' \$ \big) \\
+            \big( \id \$ & \mid FT'E' \$ \big) \\
+            \big( \id \$ & \mid \id T'E' \$ \big) \\
+            \big( \$ & \mid T'E' \$ \big) \\
+            \big( \$ & \mid E' \$ \big) \\
+            \big( \$ & \mid \$ \big)
+          \end{align*}
+          \caption{Протокол работы на $\id +\id \times \id$}
+          \label{fig:id}
+        \end{minipage}
+
+        \columnbreak
+
+        \begin{minipage}{.9\linewidth}
+          \vspace{2cm}
+          \captionsetup{type=figure}
+          \centering
+          \begin{tikzpicture}[scale=.7, grow=down]
+            \tikzstyle{level 1}=[sibling distance=6cm]
+            \tikzstyle{level 2}=[sibling distance=3cm]
+            \tikzstyle{level 4}=[sibling distance=1.5cm]
+            \node {$E$}
+              child{ node {$T$}
+                child{ node {$F$}
+                  child{ node{$\id$} }
+                }
+                child{ node{$T'$}
+                  child{ node{$\eps$} }
+                }
+              }
+              child{ node{$E'$}
+                child{ node{$+$} }
+                child{ node{$T$}
+                  child{ node{$F$}
+                    child{ node{$\id$} }
+                  }
+                  child{ node{$T'$}
+                    child{ node{$\times$} }
+                    child{ node{$F$}
+                      child{ node{$\id$} }
+                    }
+                    child{ node{$T'$}
+                      child{ node {$\eps$} }
+                    }
+                  }
+                }
+                child{ node{$E'$}
+                  child{ node {$\eps$} }
+                }
+              };
+          \end{tikzpicture}
+          \caption{Дерево разбора $\id + \id \times \id$}
+          \label{fig:treeid}
+        \end{minipage}
+      \end{multicols}
+    \end{sol}
+    %
+  \end{pr}
+  %
+  \begin{pr}
+    Докажите, что грамматика не является $\LL(1)$-грамматикой, но является
+    $\LL(2)$-грамматикой. Вычислите функции $\first_2$ и $\follow_2$ для всех
+    нетерминалов.
+    \begin{align*}
+      S & \to aAaa \mid bAba\\
+      A & \to b \mid \eps
+    \end{align*}
+    %
+    \begin{sol}
+      Для начала докажем, что данная грамматика не является $LL(1)$-грамматикой.
+      Вычислим функции $\first$ и $\follow$ для данной грамматики (Таблицы
+      \ref{table:first1} и \ref{table:follow1}).
+      \begin{table}[ht!]
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c}
+                  & $S$         & $A$         \\
+            \hline
+            $F_0$ & $\emptyset$ & $\emptyset$ \\
+            \hline
+            $F_1$ & $a,\, b$    & $b,\, \eps$ \\
+            \hline
+            $F_2$ & $a,\, b$    & $b,\, \eps$ \\
+          \end{tabular}
+          \caption{$\first$}
+          \label{table:first1}
+        }
+        \hfill
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c}
+                  & $S$  & $A$         \\
+            \hline
+            $F_0$ & $\$$ & $\emptyset$ \\
+            \hline
+            $F_1$ & $\$$ & $a,\, b$    \\
+            \hline
+            $F_2$ & $\$$ & $a,\, b$    \\
+          \end{tabular}
+          \caption{$\follow$}
+          \label{table:follow1}
+        }
+      \end{table}
+      \par\noindent Заметим, что
+      \[
+        \eps \in \first(A);\;
+        \first(A) \cap \follow(A) = \{ b \} \neq \emptyset.
+      \]
+      Следовательно, данная грамматика не является
+      $LL(1)$-грамматикой.
+
+      Теперь докажем, что данная грамматика~"--- $LL(2)$-грамматика. Рассмотрим
+      правила для $S$:
+      \[
+        S \to aAaa,\, S \to bAba.
+      \]
+      Заметим, что
+      \[
+        \forall \alpha
+        \ \first_2(aAaa \alpha) \cap \first_2(bAba \alpha) = \emptyset,
+      \]
+      так как
+      первая цепочка начинается с $a$, а вторая~"--- с $b$. Теперь рассмотрим
+      правила для $A$:
+      \[
+        A \to b,\, A \to \eps.
+      \]
+      Заметим, что все $\alpha$ такие, что
+      \[
+        S \yields_l wA \alpha,
+      \]
+      начинаются либо на $aa$, либо на $ba$, так как
+      \[
+        S \to aAaa,\, S \to bAba
+      \]
+      --- все правила вывода, содержащие в левой части $A$.
+      Значит,
+      \[
+        \forall \alpha: S \yields_l wA \alpha \longrightarrow
+        \first_2(b \alpha) \cap \first_2(\eps \alpha) = \emptyset.
+      \]
+      Получаем, что данная грамматика является $LL(2)$-грамматикой.
+
+
+      Теперь найдём функции $\first_2$ и $\follow_2$ (Таблицы \ref{table:first2}
+      и \ref{table:follow2}).
+      \begin{table}[ht!]
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c}
+                  & $S$              & $A$         \\
+            \hline
+            $F_0$ & $\emptyset$      & $b,\, \eps$ \\
+            \hline
+            $F_1$ & $ab,\, aa,\, bb$ & $b,\, \eps$ \\
+            \hline
+            $F_2$ & $ab,\, aa,\, bb$ & $b,\, \eps$ \\
+          \end{tabular}
+          \caption{$\first_2$}
+          \label{table:first2}
+        }
+        \hfill
+        \parbox{.45\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c}
+                  & $S$  & $A$           \\
+            \hline
+            $F_0$ & $\$$ & $\emptyset$   \\
+            \hline
+            $F_1$ & $\$$ & $aa,\, ba$    \\
+            \hline
+            $F_2$ & $\$$ & $aa,\, ba$    \\
+          \end{tabular}
+          \caption{$\follow_2$}
+          \label{table:follow2}
+        }
+      \end{table}
+    \end{sol}
+    %
+  \end{pr}
+  %
+  \begin{pr}[*]
+    Докажите, что язык $a^* \cup \{ a^n b^n \mid n \geq 1 \}$ не является
+    $\LL$-языком.
+  \end{pr}
+  %
+\end{document}
