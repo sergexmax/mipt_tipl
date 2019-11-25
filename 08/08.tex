@@ -1,0 +1,249 @@
+%
+\newcommand{\ptitle}{ТРЯП, 8-ое домашнее задание}
+\newcommand{\pauthor}{Сергей Пучинин}
+\newcommand{\pgroup}{873}
+\newcommand{\pdate}{\today}
+%
+\documentclass[10pt]{article}
+%
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+%
+\usepackage{geometry}
+  \geometry{a4paper, left=1.5cm, right=1cm, top=2cm, bottom=2cm}
+%
+\usepackage{lipsum} % debugging
+%
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    linkcolor = red,
+    linktoc=all
+  }
+\newcommand{\figref}[1]{\figurename~\ref{#1}}
+%
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+  \pagestyle{fancy}
+  \fancyhf{}
+  \lhead{\ptitle}
+  \rhead{\pauthor, \pgroup}
+  \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  \fancypagestyle{fancytitlepage}{
+    \lhead{}
+    \rhead{}
+    \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  }
+%
+\usepackage{tikz}
+  \usetikzlibrary{arrows,automata,positioning}
+%
+\usepackage{xargs} % multiple default parameters
+%
+\newcounter{pr} \setcounter{pr}{0}
+\newcounter{subpr}[pr] \setcounter{subpr}{0}
+\newenvironmentx{pr}[2][1=,2= ]
+  {\par\bigskip
+   \refstepcounter{pr}
+   \addcontentsline{toc}{section}{Задача \arabic{pr}#1}
+   {\large\bfseries Задача \arabic{pr}#1.#2}}
+  {}
+\newenvironmentx{subpr}[2][1=,2= ]
+  {\par\medskip\hspace{\parindent}
+   \refstepcounter{subpr}
+   \addcontentsline{toc}{subsection}{\Asbuk{subpr}#1}
+   {\normalsize\bfseries \Asbuk{subpr}#1.#2}}
+  {}
+\newenvironment{pruf}
+  {\par
+  {\itshape \underline{Доказательство.}}}
+  {\hfill $\Box$}
+\newenvironment{sol}
+  {\par
+   {\itshape \underline{Решение.}}}
+  {}
+%
+\usepackage{amsmath}
+\usepackage{amssymb}
+%
+\newcommand{\eps}{\varepsilon}
+\newcommand{\PAL}{{\mathsf{PAL}}}
+\newcommand{\yield}{\Rightarrow}
+%
+\begin{document}
+  %
+  \title{\ptitle}
+  \author{\pauthor, \pgroup}
+  \date{\pdate}
+  \maketitle
+  \thispagestyle{fancytitlepage}
+  %
+  % \tableofcontents
+  %
+  \begin{pr}
+    Постройте МП-автомат, распознающий язык палиндромов~$\PAL$ над алфавитом
+    $\Sigma = \{a, b\}$.
+    %
+    \begin{sol}
+      Нужный автомат изображён на \figref{fig:PAL}.\footnote{Обозначения над
+      стрелками нужно понимать так, что из каждой скобочки мы можем выбрать что
+      угодно, но во всех последующих подобных скобках мы должны выбирать то же
+      самое.}
+      \begin{figure}[ht]
+        \centering
+        \begin{tikzpicture}[->, >=stealth', shorten >=1pt, initial text=]
+          \node[state, initial] (q_0) {$q_0$};
+          \node[state] (q_1) [right=4cm of q_0] {$q_1$};
+          \node[state, accepting] (q_2) [right=2cm of q_1] {$q_2$};
+          %
+          \draw
+            (q_0) edge [above, loop above]
+                    node {$(a, b),(a, b, Z_0) / (a, b)(a, b, Z_0) $}
+                    (q_0)
+                  edge [above, bend right]
+                    node {$(a, b), (a, b) / \eps$}
+                    (q_1)
+                  edge [below, bend left]
+                    node {$\eps, (a, b) / \eps$}
+                    (q_1)
+            (q_1) edge [above, loop above]
+                    node {$(a, b), (a, b) / \eps$}
+                    (q_1)
+                  edge [above]
+                    node {$\eps, Z_0 / \eps$}
+                    (q_2);
+        \end{tikzpicture}
+        \caption{МП-автомат, распознающий $\PAL$.}
+        \label{fig:PAL}
+      \end{figure}
+      Докажем его корректность. Бегая из состояния $q_0$ в $q_0$ мы считываем
+      символ и записываем его на верхушку стека. Далее, мы начинаем считывать
+      символы, которые находятся на верхушке стека. То есть, проверяем, что
+      слово является палиндромом. Из $q_0$ в $q_1$ ведут два пути, так как в
+      случае палиндрома из нечётного числа букв, у центрального символа нет
+      симметричного ему. В конце, если мы смогли опустошить стек до первого
+      элемента, то убираем его и идём в принимающее состояние. Тем самым, данный
+      МП-автомат и вправду распознаёт $\PAL$.
+    \end{sol}
+  \end{pr}
+  \begin{pr}
+    Язык Дика с двумя типами скобок $D_2$ порождается грамматикой
+    \[
+      S \to SS \mid (S) \mid [S] \mid \eps.
+    \]
+    %
+    \begin{subpr}
+      Постройте недетерминированный МП-автомат, распознающий язык~$D_2$.
+      %
+      \begin{sol}
+        Нужный автомат изображён на \figref{fig:D2}.\footnote{Обозначения над
+        стрелками нужно понимать, как и в предыдущем случае, разве что с
+        инверсий скобок в случае нижней стрелки.}
+        \begin{figure}[!ht]
+          \centering
+          \begin{tikzpicture}[->, >=stealth', shorten >=1pt, initial text=]
+            \node [state, initial] (q_0) {$q_0$};
+            \node [state, accepting] (q_1) [right=4cm of q_0] {$q_1$};
+            \draw
+              (q_0) edge [above, loop above]
+                      node{$\Big((, [\Big),
+                            \Big((, [, Z_0\Big) /
+                            \Big((, [\Big)\Big((, [, Z_0\Big)$}
+                      (q_0)
+                    edge [below, loop below]
+                      node{$\Big(), ]\Big), \Big((, [\Big) /\eps$}
+                      (q_0)
+                    edge [below]
+                      node {$\eps, Z_0 / \eps$}
+                      (q_1);
+          \end{tikzpicture}
+          \caption{МП-автомат, распознающий $D_2$.}
+          \label{fig:D2}
+        \end{figure}
+        Докажем его корректность. Верхняя стрелка считывает открывающую скобку и
+        помещает её на верхушку стека, тем самым получаем в стеке открывающие
+        скобки в той последовательности, в которой они открывались. А значит,
+        закрывать мы должны их в обратной последовательности в случае правильной
+        скобочной последовательности. Это и делает нижний переход~"--- считывает
+        скобку, противоположную той, которая находится на верхушке стека.
+        Опустошив стек до первого элемента, и только в этом случае, идём в
+        принимающее состояние, удаляя $Z_0$. Тем самым, данный МП-автомат и
+        вправду распознаёт $D_2$.
+      \end{sol}
+    \end{subpr}
+    %
+    \begin{subpr}
+      Постройте детерминированный МП-автомат, распознающий язык~$D_2$, и
+      приведите доказательство его корректности по индукции.
+    \end{subpr}
+  \end{pr}
+  %
+  \begin{pr}
+    Постройте МП-автомат, распознающий язык непалиндромов над двоичным
+    алфавитом~$\Sigma^* \setminus \PAL$.
+  \end{pr}
+  %
+  \begin{pr}
+    Построить КС-грамматику~$G$, порождающую $L$, или МП-автомат~$M$,
+    распознающий $L$.
+    %
+    \begin{subpr}
+      $L = \{a^i b^j c^k \,|\, i = j \vee i = k;\; i, j, k \geq 0\}$
+      \begin{sol}
+        Построим КС-грамматику:
+        \begin{gather*}
+          S \rightarrow Q_1 \mid Q_2\\
+          \\
+          Q_1 \rightarrow RC\\
+          R \rightarrow aRb \mid \eps\\
+          C \rightarrow cC \mid \eps\\
+          \\
+          Q_2 \rightarrow AL\\
+          A \rightarrow aA \mid \eps\\
+          L \rightarrow bLc \mid \eps.
+        \end{gather*}
+        $R$ порождает $\{a^n b^n \,|\, n \geqslant 0\}$, $L$ порождает $\{b^n
+        c^n \,|\, n \geqslant 0\}$, $A$ порождает $\{a^n \,|\, n \geqslant
+        0\}$, $C$ порождает $\{c^n \,|\, n \geqslant 0\}$. Следовательно,
+        $Q_1$ порождает $\{a^n b^n c^m \,|\, n, m \geqslant 0\}$, $Q_2$
+        порождает $\{a^m b^n c^n \,|\, n, m \geqslant 0\}$. Следовательно $S$
+        порождает $\{a^i b^j c^k \,|\, i = j \vee j = k;\; i, j, k \geqslant
+        0\}$, что и требовалось.
+      \end{sol}
+    \end{subpr}
+    %
+    \begin{subpr}[*]
+      $L = \{w \,|\, w = uv \yield u \neq v \}$, то есть $w \in L$
+      непредставимо в виде $uu$.
+    \end{subpr}
+  \end{pr}
+  %
+  \begin{pr}
+    Докажите, что класс КС-языков замкнут относительно операции пересечения с
+    регулярным языком.
+    \begin{pruf}
+      Докажём, что пересечение КС-языка~$K$ и регулярного языка~$R$ задаётся
+      МП-автоматов. Рассмотрим МП-автомат с допуском по принимающему состоянию
+      для $K$ и ДКА для $R$. Тогда автомат для пересечения выглядит следующим
+      образом (аналогия прямого произведения)\footnote{Под
+      $\gamma_{\delta_K(q_2, \sigma, z)}$ мы понимаем $\gamma$ из пары, которую
+      возвращает $\delta_K(q_2, \sigma, z)$}:
+      \begin{gather*}
+        \Sigma = \Sigma_R = \Sigma_K,\\
+        \Gamma = \Gamma_K,\\
+        Q = \bigg\{[q_R, q_K] \, | \, q_R \in Q_R;\; q_K \in Q_K\bigg\},\\
+        q_0 = [{q_0}_R, {q_0}_K],\\
+        Z_0 = {Z_0}_K,\\
+        \delta\Big([q_R, q_K], \sigma, z\Big) =
+          \Bigg(\Big[\delta_R(q_R, \sigma), \delta_K(q_2, \sigma, z)\Big],
+                     \gamma_{\delta_K(q_2, \sigma, z)}\Bigg),\\
+        F = \bigg\{[f_R, f_K] \, | \, f_R \in F_R;\; f_K \in F_k\bigg\}
+      \end{gather*}
+      За операции со стеком отвечает МП-автомат с допуском по принимающему
+      состоянию, поэтому тут изменений нет, а в остальном~"--- это обычное ПП,
+      доказательство корректности которого было доказано ранее в курсе.
+    \end{pruf}
+  \end{pr}
+  %
+\end{document}
