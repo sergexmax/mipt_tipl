@@ -1,0 +1,433 @@
+%
+\newcommand{\ptitle}{ТРЯП, 11-ое Домашнее Задание}
+\newcommand{\pauthor}{Сергей Пучинин}
+\newcommand{\pgroup}{873}
+\newcommand{\pdate}{\today}
+%
+\documentclass[10pt]{article}
+%
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+%
+\usepackage{geometry}
+  \geometry{a4paper, left=1.5cm, right=1cm, top=2cm, bottom=2cm}
+%
+\usepackage{multicol}
+  \setlength{\columnsep}{1pt}
+%
+\usepackage{lipsum} % debugging
+%
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    linkcolor = red,
+    linktoc=all
+  }
+\newcommand{\figref}[1]{\figurename~\ref{#1}}
+%
+% \usepackage[all]{hypcap}
+%
+\usepackage{caption}
+%
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+  \pagestyle{fancy}
+  \fancyhf{}
+  \lhead{\ptitle}
+  \rhead{\pauthor, \pgroup}
+  \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  \fancypagestyle{fancytitlepage}{
+    \lhead{}
+    \rhead{}
+    \rfoot{\thepage \hspace{1pt} из \pageref*{LastPage}}
+  }
+%
+\usepackage{tikz}
+  \usetikzlibrary{arrows,automata,positioning,trees}
+\usepackage{tikz-qtree}
+%
+\usepackage{xargs} % multiple default parameters
+%
+\newcounter{pr} \setcounter{pr}{0}
+\newenvironmentx{pr}[2][1=,2= ]
+  {\par\bigskip
+   \refstepcounter{pr}
+   \addcontentsline{toc}{section}{Задача \arabic{pr}#1}
+   {\large\bfseries Задача \arabic{pr}#1.#2}}
+  {}
+\newcounter{subpr}[pr] \setcounter{subpr}{0}
+\newenvironmentx{subpr}[2][1=,2= ]
+  {\par\medskip\hspace{\parindent}
+   \refstepcounter{subpr}
+   \addcontentsline{toc}{subsection}{\Asbuk{subpr}#1}
+   {\normalsize\bfseries \Asbuk{subpr}#1.#2}}
+  {}
+\newenvironment{pruf}
+  {\par
+  {\itshape \underline{Доказательство.}}}
+  {\par\hfill$\blacksquare$}
+\newenvironment{sol}
+  {\par
+   {\itshape \underline{Решение.}}}
+  {}
+\newcounter{lem} \setcounter{lem}{0}
+\newenvironment{lem}
+  {\par\bigskip
+   \refstepcounter{lem}
+   {\itshape Лемма \arabic{lem}.}}
+  {}
+% \newenvironment{lempruf}
+%   {\par
+%   {\itshape Доказательство.}}
+%   {\par\hfill$\Box$}
+%
+\usepackage{chngcntr}
+  \counterwithin{figure}{pr}
+  \counterwithin{table}{pr}
+%
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+%
+\usepackage{listings}
+  \lstset{tabsize=2,
+          showstringspaces=false,
+          literate={-}{-}0,
+          columns=flexible,
+          keepspaces=true}
+%
+\newcommand{\eps}{\varepsilon}
+\newcommand{\yield}{\Rightarrow}
+\newcommand{\yields}{\xRightarrow{*}}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\emptyset}{\varnothing}
+% tipl specific
+\newcommand{\REG}{\mathsf{REG}}
+\newcommand{\CFL}{\mathsf{CFL}}
+\newcommand{\first}{\mathrm{FIRST}}
+\newcommand{\follow}{\mathrm{FOLLOW}}
+\newcommand{\LL}{\mathrm{LL}}
+% hw specific
+\newcommand{\amax}{\mathsf{max}}
+\newcommand{\abegin}{\mathsf{begin}}
+\newcommand{\aend}{\mathsf{end}}
+\newcommand{\thtml}{\mathsf{html}}
+\newcommand{\thead}{\mathsf{head}}
+\newcommand{\tbody}{\mathsf{body}}
+\newcommand{\tstyle}{\mathsf{style}}
+\newcommand{\tdiv}{\mathsf{div}}
+\newcommand{\aalign}{\mathsf{align}}
+\newcommand{\acenter}{\mathsf{center}}
+\newcommand{\aright}{\mathsf{right}}
+\newcommand{\aleft}{\mathsf{left}}
+\newcommand{\abgcolor}{\mathsf{background-color}}
+\newcommand{\cgray}{\mathsf{gray}}
+\newcommand{\ctrash}{\mathsf{add8e6}}
+\newcommand{\cblue}{\mathsf{blue}}
+%
+% \sloppy
+%
+\begin{document}
+  %
+  \title{\ptitle}
+  \author{\pauthor, \pgroup}
+  \date{\pdate}
+  \maketitle
+  \thispagestyle{fancytitlepage}
+  %
+  \begin{pr}
+    Постройте по грамматике $G$ приведённую грамматику. Все построения должны быть выполнены строго по алгоритму. Грамматика $G$ задана правилами:
+    \begin{equation*}
+      \begin{aligned}[c]
+        S & \to A \mid B \mid C \mid E \mid AG \\
+        A & \to C  \mid aABC \mid \eps \\
+        B & \to bABa \mid aCbDaGb \mid \eps
+      \end{aligned}
+      \hspace{4cm}
+      \begin{aligned}[c]
+        C & \to BaAbC \mid aGD \mid \eps \\
+        F & \to aBaaCbA \mid aGE \\
+        E & \to A.
+      \end{aligned}
+    \end{equation*}
+    %
+    \begin{sol}
+      В начале удалим все бесплодные нетерминалы.
+      \begin{gather*}
+        V_0 = \{ a,\, b,\, \eps \}; \\
+        V_1 = \{ a,\, b,\, \eps,\, A,\, B,\, C \}; \\
+        V_2 = \{ a,\, b,\, \eps,\, A,\, B,\, C,\, S,\, F,\, E \}; \\
+        V_3 = \{ a,\, b,\, \eps,\, A,\, B,\, C,\, S,\, F,\, E \}.
+      \end{gather*}
+      Получаем $N = \{ A,\, B,\, C,\, E,\, F,\, S \}$ и $P$ состоит из следующих правил:
+      \begin{equation*}
+        \begin{aligned}[c]
+          S & \to A \mid B \mid C \\
+          A & \to C  \mid aABC \mid \eps \\
+          B & \to bABa \mid \eps
+        \end{aligned}
+        \hspace{4cm}
+        \begin{aligned}[c]
+          C & \to BaAbC \mid \eps \\
+          F & \to aBaaCbA \\
+          E & \to A.
+        \end{aligned}
+      \end{equation*}
+
+      Теперь удалим все недостижимые нетерминалы.
+      \begin{gather*}
+        V_0 = \{ S \}; \\
+        V_1 = \{ S,\, A,\, B,\, C \}; \\
+        V_2 = \{ S,\, A,\, B,\, C \}.
+      \end{gather*}
+      Получаем $N = \{ S,\, A,\, B,\, C \}$, а $P$ состоит из следующих правил:
+      \begin{equation*}
+        \begin{aligned}[c]
+          S & \to A \mid B \mid C \\
+          A & \to C  \mid aABC \mid \eps
+        \end{aligned}
+        \hspace{4cm}
+        \begin{aligned}[c]
+          B & \to bABa \mid \eps \\
+          C & \to BaAbC \mid \eps.
+        \end{aligned}
+      \end{equation*}
+
+      Полученная грамматика является приведённой, что и требовалось.
+    \end{sol}
+  \end{pr}
+  %
+  \begin{pr}
+    Написать для грамматики  эквивалентную $\LL(1)$-грамматику, построить $\LL(1)$-анализатор и продемонстрировать его работу на слове $baab$.
+    \[
+      S \to baaA \mid babA \qquad A\to \eps \mid Aa \mid Ab.
+    \]
+    %
+    \begin{sol}
+      Для начала устраним левую рекурсию. Для этого уберём из грамматике все правила вывода для $A$ и добавим в грамматику следующие правила вывода:
+      \begin{gather*}
+        A \to \eps \mid A'; \\
+        A' \to aA' \mid bA' \mid a \mid b.
+      \end{gather*}
+
+      Теперь устраним правые ветвления. Для этого уберём из грамматики все правила вывода для $S$ и добавим в грамматику следующие правилы вывода:
+      \begin{gather*}
+        S \to baS'; \\
+        S' \to aA \mid bA.
+      \end{gather*}
+      Далее уберём из грамматики все правила вывода для $A'$ и добавим в грамматику следующие правила вывода:
+      \begin{gather*}
+        A' \to aA'' \mid bA''; \\
+        A'' \to A' \mid \eps.
+      \end{gather*}
+      $A''$ и $A$, как видно, оказались эквиваленты, поэтому заменим везде $A''$ на $A$. А также, оказались эквивалентны $S'$ и $A$, поэтому заменим везде $A'$ на $S'$.
+
+      Получаем грамматику со следующим набором правил вывода:
+      \begin{equation*}
+        \begin{aligned}[c]
+          S & \xrightarrow[1]{} baS' \\
+          S' & \xrightarrow[2,\, 3]{} aA \mid bA
+        \end{aligned}
+        \hspace{4cm}
+        \begin{aligned}[c]
+          A & \xrightarrow[4,\, 5]{} S' \mid \eps.
+        \end{aligned}
+      \end{equation*}
+
+      Проверим, что данная грамматика является $LL(1)$-грамматикой, построив $LL(1)$-анализатор (Таблица \ref{table:ll1}).
+      \begin{table}[ht!]
+        \parbox{.33\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c|c}
+                  & $S$         & $S'$        & $A$              \\
+            \hline
+            $F_0$ & $\emptyset$ & $\emptyset$ & $\eps$           \\
+            \hline
+            $F_1$ & $b$         & $a,\, b$    & $\eps$           \\
+            \hline
+            $F_2$ & $b$         & $a,\, b$    & $\eps,\, a,\, b$ \\
+            \hline
+            $F_2$ & $b$         & $a,\, b$    & $\eps,\, a,\, b$ \\
+          \end{tabular}
+          \caption{$\first$}
+          \label{table:first}
+        }
+        \parbox{.33\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c|c}
+                  & $S$  & $S'$        & $A$         \\
+            \hline
+            $F_0$ & $\$$ & $\emptyset$ & $\emptyset$ \\
+            \hline
+            $F_1$ & $\$$ & $\$$        & $\emptyset$ \\
+            \hline
+            $F_2$ & $\$$ & $\$$        & $\$$        \\
+          \end{tabular}
+          \caption{$\follow$}
+          \label{table:follow}
+        }
+        \parbox{0.33\linewidth}{
+          \centering
+          \begin{tabular}{c|c|c|c}
+                 & $S$ & $S'$ & $A$ \\
+            \hline
+            $a$  & $-$ & $2$  & $4$ \\
+            \hline
+            $b$  & $1$ & $3$  & $4$ \\
+            \hline
+            $\$$ & $-$ & $-$  & $5$ \\
+          \end{tabular}
+          \caption{$LL(1)$-анализатор}
+          \label{table:ll1}
+        }
+      \end{table}
+
+      Продемонстрируем его работу на слове $baab$.
+
+      \begin{equation*}
+        \begin{aligned}
+          baab \$ \mid & \\
+          baab \$ \mid & \\
+          ab \$ \mid & \\
+          ab \$ \mid & \\
+          b \$ \mid & \\
+          b \$ \mid & \\
+          b \$ \mid & \\
+          \$ \mid & \\
+          \$ \mid &
+        \end{aligned}
+        \hspace{1mm}
+        \begin{gathered}
+          S \$ \\
+          baS' \$ \\
+          S' \$ \\
+          aA \$ \\
+          A \$ \\
+          S' \$ \\
+          bA \$ \\
+          A \$ \\
+          \$
+        \end{gathered}
+        \begin{aligned}
+          & \mid \eps \\
+          & \mid 1 \\
+          & \mid 1 \\
+          & \mid 12 \\
+          & \mid 12 \\
+          & \mid 124 \\
+          & \mid 1243 \\
+          & \mid 1243 \\
+          & \mid 12435.
+        \end{aligned}
+      \end{equation*}
+    \end{sol}
+  \end{pr}
+  %
+  \begin{pr}
+    Дополните грамматику
+    \[
+      S \to 0S11,\; S \to 1S00,\; S \to \eps
+    \]
+    до атрибутной так, чтобы вычислялась максимальная длина непрерывной последовательности из единиц в порождаемом слове.
+    %
+    \begin{sol}
+      Введём атрибуты $\amax$, $\abegin$ и $\aend$ для нетерминала $S$, которые содержат максимальную длину непрерывной последовательности из единиц во всём слове, на конце слова и в начале слова, соответственно. Данные атрибуты будут вычисляться по следующим правилам:
+      \begin{align*}
+        & S \to \eps: \\
+        & \qquad S[\amax] = S[\abegin] = S[\aend] = 0; \\
+        & S_1 \to 0 S_2 11: \\
+        & \qquad S_1[\amax] = \max\big( S_2[\amax],\, S_2[\aend] + 2 \big), \\
+        & \qquad S_1[\abegin] = 0, \\
+        & \qquad S_1[\aend] = S_2[\aend] + 2; \\
+        & S_1 \to 1 S_2 00: \\
+        & \qquad S_1[\amax] = \max\big( S_2[\amax],\, S_2[\abegin] + 1 \big), \\
+        & \qquad S_1[\abegin] = S_2[\abegin] + 1, \\
+        & \qquad S_1[\aend] = 0.
+      \end{align*}
+      Данные правила, как легко видеть из грамматики, будут для каждого узла дерева порождать соответствующие их смыслу значения для подслова, находящегося под этим узлом. То есть, в атрибуте $\amax$ корня дерева будет находиться максимальная длина непрерывной последовательности из единиц в порождаемом слове, что и требовалось.
+    \end{sol}
+  \end{pr}
+  %
+  \begin{pr}\label{pr:divs}
+    Постройте по коду на рис.~\ref{fig:divs} дерево html-документа. Определите значение атрибута $\aalign$ у каждого из узлов $\tdiv$ дерева, а также определите цвет фона элемента (атрибут $\abgcolor$). Проверьте себя, сохранив текст ниже в файле с расширением .html и открыв файл в браузере.
+    \begin{figure}[ht!]
+      \begin{lstlisting}[language=HTML]
+        <html>
+        <head>
+          <style>
+           div{border: 1px solid black; padding:1px;
+                margin: 1px; width:40%; height:40%;}
+          </style>
+        </head>
+        <body>
+        <div style="background-color:lightblue; width:500px;
+              height:500px;" align="center">1
+          <div style="background-color:blue;" align="left">
+            2
+            <div align="right">
+              3
+              <div style="background-color:gray;" align="center">
+                4
+              </div>
+            </div>
+            <div>
+              5
+            </div>
+          </div>
+          <div>
+            6
+          </div>
+        </div>
+        </body>
+        </html>
+      \end{lstlisting}
+      \caption{HTML-код для задачи~\ref{pr:divs}}
+      \label{fig:divs}
+    \end{figure}
+    %
+    \begin{sol}
+      \begin{figure}[ht!]
+        \parbox{.3\linewidth}{
+          \centering
+          \begin{tikzpicture}
+            \tikzset{edge from parent/.style={
+                                              draw,
+                                              edge from parent path={
+                                                                      (\tikzparentnode.south)
+                                                                      -- +(0,-8pt)
+                                                                      -| (\tikzchildnode)}}}
+            \Tree [.$\thtml$ [.$\thead$ $\tstyle$ ]
+                             [.$\tbody$ [.$\tdiv_1$ [.$\tdiv_2$ [.$\tdiv_3$ $\tdiv_4$ ]
+                                                                [.$\tdiv_5$ ] ]
+                                                    [.$\tdiv_6$ ] ] ] ]
+          \end{tikzpicture}
+          \caption{Дерево html-документа, изображенного на \figref{fig:divs}}
+        }
+        \hfill
+        \parbox{.6\linewidth}{
+          \centering
+          \begin{align*}
+            & \tdiv_1[\aalign] = \acenter \\
+            & \tdiv_1[\abgcolor] = \ctrash \\
+            & \tdiv_2[\aalign] = \aleft \\
+            & \tdiv_2[\abgcolor] = \cblue \\
+            & \tdiv_6[\aalign] = \acenter \\
+            & \tdiv_6[\abgcolor] = \ctrash \\
+            & \tdiv_3[\aalign] = \aright \\
+            & \tdiv_3[\abgcolor] = \cblue \\
+            & \tdiv_5[\aalign] = \aleft \\
+            & \tdiv_5[\abgcolor] = \cblue \\
+            & \tdiv_4[\aalign] = \acenter \\
+            & \tdiv_4[\abgcolor] = \cgray.
+          \end{align*}
+          \caption{Значения атрибутов узлов $\tdiv$}
+          \label{fig:attrdiv}
+        }
+      \end{figure}
+    \end{sol}
+  \end{pr}
+  %
+\end{document}
