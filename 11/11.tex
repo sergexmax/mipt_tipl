@@ -165,7 +165,7 @@
       Получаем $N = \{ A,\, B,\, C,\, E,\, F,\, S \}$ и $P$ состоит из следующих правил:
       \begin{equation*}
         \begin{aligned}[c]
-          S & \to A \mid B \mid C \\
+          S & \to A \mid B \mid C \mid E \\
           A & \to C  \mid aABC \mid \eps \\
           B & \to bABa \mid \eps
         \end{aligned}
@@ -180,19 +180,20 @@
       Теперь удалим все недостижимые нетерминалы.
       \begin{gather*}
         V_0 = \{ S \}; \\
-        V_1 = \{ S,\, A,\, B,\, C \}; \\
-        V_2 = \{ S,\, A,\, B,\, C \}.
+        V_1 = \{ S,\, A,\, B,\, C,\, E \}; \\
+        V_2 = \{ S,\, A,\, B,\, C,\, E \}.
       \end{gather*}
-      Получаем $N = \{ S,\, A,\, B,\, C \}$, а $P$ состоит из следующих правил:
+      Получаем $N = \{ S,\, A,\, B,\, C,\, E \}$, а $P$ состоит из следующих правил:
       \begin{equation*}
         \begin{aligned}[c]
-          S & \to A \mid B \mid C \\
-          A & \to C  \mid aABC \mid \eps
+          S & \to A \mid B \mid C \mid E \\
+          A & \to C  \mid aABC \mid \eps \\
+          B & \to bABa \mid \eps \\
         \end{aligned}
         \hspace{4cm}
         \begin{aligned}[c]
-          B & \to bABa \mid \eps \\
-          C & \to BaAbC \mid \eps.
+          C & \to BaAbC \mid \eps \\
+          E & \to A.
         \end{aligned}
       \end{equation*}
 
